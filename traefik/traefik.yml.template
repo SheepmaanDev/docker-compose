@@ -1,0 +1,87 @@
+# ============================================================================
+# TRAEFIK V3 - CONFIGURATION STATIQUE (traefik.yml)
+# ============================================================================
+
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: "${DOMAIN}"
+            sans:
+              - "*${DOMAIN}"
+      middlewares:
+        - security-headers@docker
+        - compression@docker
+    transport:
+      respondingTimeouts:
+        readTimeout: 60s
+        writeTimeout: 60s
+        idleTimeout: 180s
+      lifeCycle:
+        requestAcceptGraceTimeout: 5s
+        graceTimeOut: 10s
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik
+    watch: true
+  file:
+    directory: "/dynamic"
+    watch: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "info@scsinformatique.com"
+      storage: "/letsencrypt/acme.json"
+      tlsChallenge: {}
+
+log:
+  level: INFO
+  filePath: "/logs/traefik.log"
+  format: json
+  maxSize: 100
+  maxBackups: 3
+  maxAge: 28
+  compress: true
+
+accessLog:
+  filePath: "/logs/access.log"
+  format: json
+  bufferingSize: 100
+  filters:
+    statusCodes:
+      - "400-599"
+  fields:
+    defaultMode: keep
+    names:
+      ClientUsername: drop
+    headers:
+      defaultMode: keep
+      names:
+        User-Agent: keep
+        Authorization: drop
+        Cookie: drop
+

@@ -1,0 +1,18 @@
+services:
+  urbackup:
+    image: uroni/urbackup-server:latest
+    container_name: urbackup
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Europe/Paris
+    cap_add:
+      - SYS_ADMIN
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # Base de données + configs UrBackup
+      - ./db:/var/urbackup
+      # Répertoire de stockage des sauvegardes
+      - /mnt/raid/backups:/backups

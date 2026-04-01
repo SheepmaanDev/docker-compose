@@ -1,0 +1,78 @@
+name: monitoring
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    user: "0:0"
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.listen-address=0.0.0.0:9090
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    networks:
+      - monitoring
+
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    user: "0:0"
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    volumes:
+      - /:/host:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - --path.rootfs=/host
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    user: "0:0"
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: scsinfo
+      GF_SECURITY_ADMIN_PASSWORD: adagiopc22
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
