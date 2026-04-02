@@ -28,7 +28,7 @@ services:
     volumes:
       - /:/host:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
 
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
