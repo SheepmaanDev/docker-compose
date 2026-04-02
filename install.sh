@@ -4,9 +4,9 @@ set -euo pipefail  # Arrêt sur erreur, undefined vars, pipefail
 # =========================
 # Création des variables
 # =========================
-LOCAL_IP=$(hostname -I | awk '{print $1}')
-PUBLIC_IP=$(curl -s https://api.ipify.org)
-HOST_NAME=$(hostname)
+LOCAL_IP=""
+PUBLIC_IP=""
+HOST_NAME=""
 
 REPO_URL="https://github.com/SheepmaanDev/docker-compose.git"
 REPO_BRANCH="main"
@@ -69,11 +69,47 @@ create_dir() {
             echo "  -> $dossier"
             sudo mkdir -p "/srv/$dossier"
             sudo chown "$USER:$USER" "/srv/$dossier"
-            SELECTED_DIRS+=("$dossier")  # ← on mémorise
+            SELECTED_DIRS+=("$dossier")
+
+            create_subdirs_for_service "$dossier"
         else
             echo "  -> Numéro invalide: $num"
         fi
     done
+}
+
+create_subdirs_for_service() {
+    local service="$1"
+
+    case "$service" in
+        monitoring)
+            sudo mkdir -p /srv/monitoring/prometheus/data
+            sudo mkdir -p /srv/monitoring/grafana/data
+            sudo mkdir -p /srv/monitoring/telegraf
+            sudo chown -R "$USER:$USER" /srv/monitoring
+            ;;
+
+        nextcloud)
+            sudo mkdir -p /srv/nextcloud/nextcloud-db
+            sudo mkdir -p /mnt/raid/nextcloud
+            sudo chown -R "$USER:$USER" /srv/nextcloud /mnt/raid/nextcloud
+            ;;
+
+        traefik)
+            sudo mkdir -p /srv/traefik/acme
+            sudo mkdir -p /srv/traefik/dynamic
+            sudo mkdir -p /srv/traefik/logs
+            sudo chown -R "$USER:$USER" /srv/traefik
+            echo "{}" | sudo tee /srv/traefik/acme/acme.json >/dev/null
+            sudo chmod 600 /srv/traefik/acme/acme.json
+            ;;
+
+        urbackup)
+            sudo mkdir -p /srv/urbackup/db
+            sudo mkdir -p /mnt/raid/urbackup
+            sudo chown -R "$USER:$USER" /srv/urbackup /mnt/raid/urbackup
+            ;;
+    esac
 }
 
 clone_repo() {
@@ -100,9 +136,22 @@ copy_service_files() {
     fi
 
     echo "  -> Copie des fichiers pour $service"
-    rsync -av --delete \
+    rsync -av \
+        --delete \
         --exclude ".git" \
         --exclude ".env" \
+        --exclude "prometheus/" \
+        --exclude "grafana/" \
+        --exclude "telegraf/" \
+        --exclude "logs/" \
+        --exclude "dynamic/" \
+        --exclude "acme/" \
+        --exclude "acme.json" \
+        --exclude "nextcloud-db" \
+        --exclude "urbackup/db" \
+        --exclude "db/" \
+        --exclude "/mnt/raid/nextcloud" \
+        --exclude "/mnt/raid/urbackup" \
         "$src_dir/" "$dst_dir/"
 }
 
@@ -119,7 +168,7 @@ EOF
 
     if [ -f "$srv_path/prometheus.yml.template" ]; then
         export LOCAL_IP PUBLIC_IP HOST_NAME
-        envsubst < "$srv_path/prometheus.yml.template" > "$srv_path/prometheus.yml"
+        envsubst < "$srv_path/prometheus.yml.template" > "$srv_path/prometheus/prometheus.yml"
         echo "  -> prometheus.yml généré"
     else
         echo "  -> prometheus.yml.template absent, génération ignorée"
@@ -127,7 +176,7 @@ EOF
 
     if [ -f "$srv_path/telegraf.conf.template" ]; then
         export LOCAL_IP PUBLIC_IP HOST_NAME
-        envsubst < "$srv_path/telegraf.conf.template" > "$srv_path/telegraf.conf"
+        envsubst < "$srv_path/telegraf.conf.template" > "$srv_path/telegraf/telegraf.conf"
         echo "  -> telegraf.conf généré"
     else
         echo "  -> telegraf.conf.template absent, génération ignorée"
@@ -138,13 +187,15 @@ generate_traefik_files() {
     local srv_path="/srv/traefik"
     local domain
 
+    # Création network traefik 
+    sudo docker network create traefik
     # Demande le domaine si pas déjà configuré
     if [ ! -f "$srv_path/.env" ]; then
-        read -r -p "Domaine principal Traefik (ex: sheepmaan.duckdns.org): " DOMAIN
+        read -r -p "Domaine principal Traefik (ex: scsinformatique.com): " DOMAIN
     else
         DOMAIN=$(grep '^DOMAIN=' "$srv_path/.env" | cut -d= -f2- || echo "")
         if [ -z "$DOMAIN" ]; then
-            read -r -p "Domaine principal Traefik (ex: sheepmaan.duckdns.org): " DOMAIN
+            read -r -p "Domaine principal Traefik (ex: scsinformatique.com): " DOMAIN
         fi
     fi
 
@@ -273,10 +324,10 @@ deploy_service() {
     prepare_service "$service"
 
     if [ -f "$srv_path/docker-compose.yml" ]; then
-        docker compose -f "$srv_path/docker-compose.yml" up -d
+        sudo docker compose -f "$srv_path/docker-compose.yml" up -d
         echo "  -> $service démarré"
     elif [ -f "$srv_path/compose.yml" ]; then
-        docker compose -f "$srv_path/compose.yml" up -d
+        sudo docker compose -f "$srv_path/compose.yml" up -d
         echo "  -> $service démarré"
     else
         echo "  -> Aucun fichier docker-compose.yml trouvé pour $service"
@@ -294,10 +345,16 @@ deploy_selected_services() {
 
 main() {
     # Étapes optionnelles selon ton besoin
-    # update_sys
-    # install_tools
-    # install_docker
+    update_sys
+    install_tools
+    install_docker
 
+    # Initialisation maintenant que curl est dispo
+    LOCAL_IP=$(hostname -I | awk '{print $1}')
+    PUBLIC_IP=$(curl -s https://api.ipify.org)
+    HOST_NAME=$(hostname)
+
+    clear
     create_dir
     clone_repo
     deploy_selected_services
