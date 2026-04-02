@@ -1,10 +1,11 @@
+name: nextcloud
 services:
   nextcloud-db:
     image: mariadb:lts
     restart: unless-stopped
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
-      - /mnt/raid/nextcloud-db:/var/lib/mysql
+      - ./nextcloud-db:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
@@ -15,6 +16,8 @@ services:
     image: redis:alpine
     restart: unless-stopped
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - ./nextcloud-redis:/data
 
   nextcloud-app:
     image: nextcloud:apache
