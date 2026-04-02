@@ -15,4 +15,4 @@ services:
       # Base de données + configs UrBackup
       - ./db:/var/urbackup
       # Répertoire de stockage des sauvegardes
-      - /mnt/raid/backups:/backups
+      - /mnt/raid/urbackup:/backups
