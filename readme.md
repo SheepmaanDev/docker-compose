@@ -4,8 +4,6 @@
 ## Pré-requis :
 * Avoir monté son RAID sur /mnt/raid
 
--------------------------------------------------------
-
 ## Utilisation :
 
 1. Copier le script et le rendre executable
@@ -16,8 +14,6 @@ chmod +x install.sh
 ```bash
 ./install.sh
 ```
-
--------------------------------------------------------
 
 ## Architecture créé :
 
