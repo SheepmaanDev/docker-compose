@@ -26,6 +26,28 @@ install_tools () {
     sudo apt-get install -y curl wget ncdu htop iotop mtr nmap rsync btrfs-progs git mdadm smartmontools parted gettext-base
 }
 
+check_raid() {
+    local answer
+
+    clear
+    read -r -p "As-tu déjà créé ton RAID sur /mnt/raid ? (oui/non) : " answer
+
+    case "${answer,,}" in
+        oui|o|yes|y)
+            echo "OK, on continue..."
+            ;;
+        non|n|no)
+            echo "RAID non créé, crée-le et relance le script."
+            echo "Attention au point de montage, il doit être /mnt/raid."
+            exit 1
+            ;;
+        *)
+            echo "Réponse invalide. Merci de répondre par oui ou non."
+            exit 1
+            ;;
+    esac
+}
+
 install_docker () {
     # Dépendances
     sudo apt-get install -y ca-certificates curl gnupg lsb-release
@@ -341,15 +363,17 @@ deploy_selected_services() {
     for service in "${SELECTED_DIRS[@]}"; do
         deploy_service "$service"
     done
+    echo ""
 }
 
+
+
 main() {
-    # Étapes optionnelles selon ton besoin
     update_sys
     install_tools
+    check_raid
     install_docker
 
-    # Initialisation maintenant que curl est dispo
     LOCAL_IP=$(hostname -I | awk '{print $1}')
     PUBLIC_IP=$(curl -s https://api.ipify.org)
     HOST_NAME=$(hostname)
@@ -362,5 +386,9 @@ main() {
     echo ""
     echo "✅ Tous les services sélectionnés ont été traités."
 }
+
+# =========================
+# Execution des fonctions
+# =========================
 
 main "$@"
