@@ -28,7 +28,7 @@ declare -a DIR_DOCKER=(monitoring urbackup traefik nextcloud)
 declare -a SELECTED_DIRS=()
 
 # Rapports (dans /tmp pour éviter les soucis de droits)
-BASE_REPORT="/tmp/docker-bootstrap-$(date +%F-%H%M%S)"
+BASE_REPORT="/tmp/docker-$(date +%F-%H%M%S)"
 LOG_FILE="${BASE_REPORT}.log"
 REPORT_TXT="${BASE_REPORT}-report.txt"
 REPORT_MD="${BASE_REPORT}-report.md"
