@@ -122,8 +122,6 @@ create_subdirs_for_service() {
             sudo mkdir -p /srv/traefik/dynamic
             sudo mkdir -p /srv/traefik/logs
             sudo chown -R "$USER:$USER" /srv/traefik
-            echo "{}" | sudo tee /srv/traefik/acme/acme.json >/dev/null
-            sudo chmod 600 /srv/traefik/acme/acme.json
             ;;
 
         urbackup)
@@ -241,8 +239,8 @@ EOF
     fi
 
     # acme.json toujours créé/validé
-    touch "$srv_path/acme.json"
-    chmod 600 "$srv_path/acme.json"
+    echo "{}" | sudo tee /srv/traefik/acme/acme.json >/dev/null
+    sudo chmod 600 /srv/traefik/acme/acme.json
     echo "  -> acme.json créé/mis à jour"
 }
 
