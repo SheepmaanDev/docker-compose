@@ -31,7 +31,7 @@ A la fin, le script génére 3 fichiers de rapport dans /tmp/docker-xxxxxx :
 ### Sur disque system :
 ```text
 /srv/
-├── monitoring              → Stack observabilité (Prometheus, Grafana, Telegraf, Cadvisor, Node-exporter)
+├── monitoring              → Stack monitoring (Prometheus, Grafana, Telegraf, Cadvisor, Node-exporter)
 │   ├── prometheus          → Collecte métriques
 |   |   ├── data            → Base de données
 │   │   └── prometheus.yml  → Configuration Prometheus
