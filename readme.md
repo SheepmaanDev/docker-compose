@@ -35,32 +35,32 @@ chmod +x install.sh
 ### 💾 Sur disque système (`/srv/`)
 ```text
 📁 /srv/
-├── 🖥️ monitoring               → Stack monitoring (Prometheus,Grafana,Telegraf,Cadvisor,Node-exporter)
-│   ├── 📊 prometheus          → Collecte métriques
-│   │   ├── 💾 data            → Base de données
-│   │   └── ⚙️ prometheus.yml  → Configuration Prometheus
-│   ├── 📈 grafana             → Dashboards et alertes
-│   │   └── 💾 data            → Configs et dashboards persistants
-│   ├── 📡 telegraf            → Agent de collecte système
-│   │   └── ⚙️ telegraf.conf   → Configuration Telegraf
-│   └── 🐳 docker-compose.yml  → Docker compose "monitoring"
-├── ☁️ nextcloud               → Serveur de fichiers cloud
+├── 🖥️ monitoring             → Stack monitoring (Prometheus,Grafana,Telegraf,Cadvisor,Node-exporter)
+│   ├── 📊 prometheus         → Collecte métriques
+│   │   ├── 💾 data           → Base de données
+│   │   └── ⚙️ prometheus.yml → Configuration Prometheus
+│   ├── 📈 grafana            → Dashboards et alertes
+│   │   └── 💾 data           → Configs et dashboards persistants
+│   ├── 📡 telegraf           → Agent de collecte système
+│   │   └── ⚙️ telegraf.conf  → Configuration Telegraf
+│   └── 🐳 docker-compose.yml → Docker compose "monitoring"
+├── ☁️ nextcloud              → Serveur de fichiers cloud
 │   ├── 🗄️ nextcloud-db       → BDD (métadonnées,users,groups,permissions,apps,logs)
-│   ├── 🔄 nextcloud-redis     → Cache Redis
+│   ├── 🔄 nextcloud-redis    → Cache Redis
 │   ├── ⚙️ .env               → Variables d'environnement Nextcloud
-│   └── 🐳 docker-compose.yml  → Docker compose "nextcloud"
-├── 🔄 traefik                 → Reverse proxy + Let's Encrypt
+│   └── 🐳 docker-compose.yml → Docker compose "nextcloud"
+├── 🔄 traefik                → Reverse proxy + Let's Encrypt
 │   ├── 🔐 acme               → Certificats SSL
 │   │   └── 🔒 acme.json      → /!\ Stockage certificats /!\
 │   ├── ⚙️ dynamic            → Configs dynamiques (labels Docker)
 │   ├── 📋 logs               → Logs d'accès/erreurs
 │   ├── ⚙️ .env               → Variables d'environnement Traefik
 │   ├── ⚙️ traefik.yml        → Configuration statique Traefik
-│   └── 🐳 docker-compose.yml  → Docker compose "traefik"
-└── 💾 urbackup                → Service de sauvegarde
+│   └── 🐳 docker-compose.yml → Docker compose "traefik"
+└── 💾 urbackup               → Service de sauvegarde
     ├── 🗄️ db                 → Base SQLite backups
     ├── ⚙️ .env               → Variables d'environnement Urbackup
-    └── 🐳 docker-compose.yml  → Docker compose "urbackup"
+    └── 🐳 docker-compose.yml → Docker compose "urbackup"
 ```
 
 
