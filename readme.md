@@ -31,7 +31,7 @@ A la fin, le script génére 3 fichiers de rapport dans /tmp/docker-xxxxxx :
 ### Sur disque system :
 ```text
 /srv/
-├── monitoring              → Stack monitoring (Prometheus, Grafana, Telegraf, Cadvisor, Node-exporter)
+├── monitoring              → Stack monitoring (Prometheus,Grafana,Telegraf,Cadvisor,Node-exporter)
 │   ├── prometheus          → Collecte métriques
 |   |   ├── data            → Base de données
 │   │   └── prometheus.yml  → Configuration Prometheus
@@ -66,5 +66,22 @@ A la fin, le script génére 3 fichiers de rapport dans /tmp/docker-xxxxxx :
 └── urbackup         → Sauvegardes clients
 ```
 
+## Port utilisé :
+| Stack      | Service         | Port hôte | Port conteneur   | Usage principal                             |
+| ---------- | --------------- | --------- | ---------------- | ------------------------------------------- |
+| Monitoring | prometheus      | 9090      | 9090             | UI Prometheus + endpoint /metrics           |
+| Monitoring | grafana         | 3000      | 3000             | UI Grafana                                  |
+| Monitoring | cadvisor        | 8081      | 8080             | UI + /metrics cAdvisor                      |
+| Monitoring | node-exporter   | 9100      | 9100 (host)      | /metrics Node Exporter                      |
+| Monitoring | telegraf        | 9126      | 9126 (host)      | Output Prometheus exposé par Telegraf       |
+| Nextcloud  | nextcloud-app   | 8181      | 80               | UI Nextcloud HTTP (et backend pour Traefik) |
+| Nextcloud  | nextcloud-db    | —         | 3306             | MariaDB interne (non exposé)                |
+| Nextcloud  | nextcloud-redis | —         | 6379             | Redis interne (non exposé)                  |
+| UrBackup   | urbackup        | 55414     | 55414 (host)     | UI web UrBackup                             |
+| UrBackup   | urbackup        | 55415     | 55415 (host)     | Service de backup clients                   |
+| UrBackup   | urbackup        | 35623 UDP | 35623 UDP (host) | Découverte / status clients                 |
+| Traefik    | traefik         | 80        | 80               | Entrypoint HTTP web                         |
+| Traefik    | traefik         | 443       | 443              | Entrypoint HTTPS websecure                  |
+| Traefik    | traefik         | 8080      | 8080             | Dashboard/API Traefik                       |
 
 
